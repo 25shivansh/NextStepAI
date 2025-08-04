@@ -16,55 +16,45 @@ export async function updateUser(data) {
   if (!user) throw new Error("User not found");
 
   try {
-    // Start a transaction to handle both operations
-    const result = await db.$transaction(
-      async (tx) => {
-        // First check if industry exists
-        let industryInsight = await tx.industryInsight.findUnique({
-          where: {
-            industry: data.industry,
-          },
-        });
-
-        // If industry doesn't exist, create it with default values
-        if (!industryInsight) {
-          industryInsight = await tx.industryInsight.create({
-            data: {
-              industry: data.industry,
-              salaryRanges: [],
-              growthRate: 0.0,
-              demandLevel: "Medium",
-              topSkills: [],
-              marketOutlook: "Neutral",
-              keyTrends: [],
-              recommendedSkills: [],
-              nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            },
-          });
-        }
-
-        // Now update the user
-        const updatedUser = await tx.user.update({
-          where: {
-            id: user.id,
-          },
-          data: {
-            industry: data.industry,
-            experience: data.experience,
-            bio: data.bio,
-            skills: data.skills,
-          },
-        });
-
-        return { updatedUser, industryInsight };
+    // First check if industry exists
+    let industryInsight = await db.industryInsight.findUnique({
+      where: {
+        industry: data.industry,
       },
-      {
-        timeout: 10000, // default: 5000
-      }
-    );
+    });
+
+    // If industry doesn't exist, create it with default values
+    if (!industryInsight) {
+      industryInsight = await db.industryInsight.create({
+        data: {
+          industry: data.industry,
+          salaryRanges: [],
+          growthRate: 0.0,
+          demandLevel: "Medium",
+          topSkills: [],
+          marketOutlook: "Neutral",
+          keyTrends: [],
+          recommendedSkills: [],
+          nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      });
+    }
+
+    // Now update the user
+    const updatedUser = await db.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        industry: data.industry,
+        experience: data.experience,
+        bio: data.bio,
+        skills: data.skills,
+      },
+    });
 
     revalidatePath("/");
-    return { success: true, user: result.updatedUser };
+    return { success: true, user: updatedUser };
   } catch (error) {
     console.error("Error updating user and industry:", error.message);
     throw new Error("Failed to update profile");
