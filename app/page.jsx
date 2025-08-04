@@ -16,8 +16,27 @@ import {
   Sparkles,
   CheckCircle2,
 } from "lucide-react";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { checkUser } from "@/lib/checkUser";
+import { getUserOnboardingStatus } from "@/actions/user";
 
-export default function Home() {
+export default async function Home() {
+  // Check if user is authenticated
+  const { userId } = await auth();
+  
+  if (userId) {
+    // User is signed in, check onboarding status
+    await checkUser();
+    const { isOnboarded } = await getUserOnboardingStatus();
+    
+    if (isOnboarded) {
+      redirect("/dashboard");
+    } else {
+      redirect("/onboarding");
+    }
+  }
+
   return (
     <div>
       <div className="grid-background"></div>

@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/header";
 import { dark } from "@clerk/themes";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ['latin'] }); // ✅ correct spelling
 
@@ -17,10 +18,9 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  
   return (
     <ClerkProvider appearance={{
-      baseTheme:dark,
+      baseTheme: dark,
     }}
     
     >
@@ -36,6 +36,7 @@ export default function RootLayout({ children }) {
             {/* Header*/}
             <Header/>
             <main className="min-h-screen">{children}</main>
+            <Toaster richColors/>
             {/*Footer*/}
             <footer className="bg-muted/50 py-12">
               <div className="container mx-auto px-4 text-center text-gray-200 ">
